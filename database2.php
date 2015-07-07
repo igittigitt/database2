@@ -2942,16 +2942,17 @@ EOT;
 
 				if ( $argument !== '' )
 					// 2) filter operates with non-empty argument
-					if ( $opMap[$filter['op']] )
+					$op = strtolower($filter['op']);
+					if ( $opMap[$op] )
 					{
 						// 3) filter uses valid operation
 						// ----> include it.
 
-						if ( in_array( $filter['op'], array( 'like', 'nlike' ) ) )
+						if ( in_array( $op, array( 'like', 'nlike' ) ) )
 							if ( strpos( $argument, '%' ) === false )
 								$argument = '%' . $argument . '%';
 
-						$out[0] .= sprintf( $opMap[$filter['op']], $mode,
+						$out[0] .= sprintf( $opMap[$op], $mode,
 											$filter['col'] );
 
 						if ( is_array( $out[1] ) )
