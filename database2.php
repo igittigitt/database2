@@ -2858,10 +2858,11 @@ EOT;
 
 				$session['search'] = array();
 
-				if ( $this->options['basefilter'] )
+				if ( $this->options['basefilter'] ) {
 					// initialize filter using provided code
 					return ( $session['search'] = $this->parseFilterCode( $this->options['basefilter'] ) );
 
+				}
 
 
 			// parse filter input and transfer it to session
