@@ -42,11 +42,11 @@ class syntax_plugin_database2 extends DokuWiki_Syntax_Plugin {
      * @param string $mode Parser mode
      */
     public function connectTo($mode) {
-        $this->Lexer->addEntryPattern("<database2.*?>(?=.*?</database2>)", $mode, 'plugin_database2');
+        $this->Lexer->addEntryPattern("<database.*?>(?=.*?</database>)", $mode, 'plugin_database2');
     }
 
     public function postConnect() {
-        $this->Lexer->addExitPattern('</database2>','plugin_database2');
+        $this->Lexer->addExitPattern('</database>','plugin_database2');
     }
 
     /**
