@@ -947,7 +947,7 @@ EOT
 	 */
 
 	protected function editRecord( $rowid, $readOnly, $duplicateOf = null,
-								   $rowACL = null )
+								   $rowACL = null, $retn = true )
 	{
 
 		$ioIndex  = $this->getIndex();
@@ -1289,14 +1289,14 @@ EOT
 		// compile form
 		$elements = array();
 
-		$elements[] = $this->renderField( true, null, null, array(), null, $readOnly, $rowACL );
+		$elements[] = $this->renderField( true, null, null, array(), null, $readOnly, $rowACL, $retn );
 
 		foreach ( $store as $column => $value )
 			$elements[] = $this->renderField( $rowid, $column, $value,
 											  $this->meta[$column],
-											  $errors[$column], $readOnly, $rowACL );
+											  $errors[$column], $readOnly, $rowACL, $retn );
 
-		$elements[] = $this->renderField( false, $nav, null, array(), null, $readOnly, $rowACL );
+		$elements[] = $this->renderField( false, $nav, null, array(), null, $readOnly, $rowACL, $retn );
 
 
 		if ( $readOnly && $rowid )
@@ -2076,9 +2076,21 @@ EOT
 
 		$trClass    = $this->options['wikistyle'] ? '' : ' class="data-list"';
 		$tableClass = $this->options['wikistyle'] ? ' class="inline"' : '';
+		$headerstyle = $this->options['hideheader'];
+		$detailview = $this->options['detailview'];
 
-
-		$table = <<<EOT
+		if ( !$detailview || $count > 1 ) {
+			if ( $headerstyle ) {
+				$table = <<<EOT
+   <table width="100%"$tableClass>
+     <tbody>
+     $rows
+     </tbody>
+   </table>
+EOT;
+			}
+			else {
+				$table = <<<EOT
    <table width="100%"$tableClass>
     <thead>
      <tr class="row0">
@@ -2095,7 +2107,7 @@ EOT
     </caption>
    </table>
 EOT;
-
+			}
 		if ( $expectInput || !$listAll )
 			$table     = <<<EOT
 <table class="database2"$width>
@@ -2137,6 +2149,10 @@ EOT;
  </tbody>
 </table>
 EOT;
+		}
+		else {
+			$this->editRecord( $rowid, true, null, null, false);
+		}
 
 		return $expectInput ? $this->wrapInForm( $table ) : $table;
 
@@ -2835,15 +2851,14 @@ EOT;
 		{
 
 			if ( !is_array( $session['search'] ) )
-			{
 
 				$session['search'] = array();
 
-				if ( $this->options['basefilter'] )
+				if ( $this->options['basefilter'] ) {
 					// initialize filter using provided code
 					return ( $session['search'] = $this->parseFilterCode( $this->options['basefilter'] ) );
 
-			}
+				}
 
 
 			// parse filter input and transfer it to session
@@ -2938,16 +2953,17 @@ EOT;
 
 				if ( $argument !== '' )
 					// 2) filter operates with non-empty argument
-					if ( $opMap[$filter['op']] )
+					$op = strtolower($filter['op']);
+					if ( $opMap[$op] )
 					{
 						// 3) filter uses valid operation
 						// ----> include it.
 
-						if ( in_array( $filter['op'], array( 'like', 'nlike' ) ) )
+						if ( in_array( $op, array( 'like', 'nlike' ) ) )
 							if ( strpos( $argument, '%' ) === false )
 								$argument = '%' . $argument . '%';
 
-						$out[0] .= sprintf( $opMap[$filter['op']], $mode,
+						$out[0] .= sprintf( $opMap[$op], $mode,
 											$filter['col'] );
 
 						if ( is_array( $out[1] ) )
@@ -5713,7 +5729,7 @@ EOT
 	 * @return string HTML code representing single form field
 	 */
 
-	protected function renderField( $rowid, $column, $value, $def, $error, $readOnly, &$rowACL )
+	protected function renderField( $rowid, $column, $value, $def, $error, $readOnly, &$rowACL, $retn )
 	{
 
 		if ( $rowid === true )
@@ -5765,11 +5781,12 @@ EOT;
 					$name = $this->getLang( 'cmdreturn' );
 				}
 
-
-				$buttons[] = '<input type="submit" name="' .
+				if ( $retn ) {
+					$buttons[] = '<input type="submit" name="' .
 							 $this->varname( '____cancel' ) .
 							 '" value="' . ( $readOnly ? $name : ( $mode ? $this->getLang( 'cmdnosave' ) : $this->getLang( 'cmdcancel' ) ) ) .
 							 '" />';
+				}
 
 				if ( $mode )
 					$buttons[] = $mode;
