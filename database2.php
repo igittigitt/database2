@@ -5895,7 +5895,7 @@ EOT;
 					{
 
 						$selected     = ( $index === $value ) ? ' selected="selected"' : '';
-						$selectedAny |= $selected;
+						$selectedAny |= !!$selected;
 
 						if ( $def['format'] == 'enum' )
 							$key = $index + 1;
